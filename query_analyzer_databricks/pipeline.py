@@ -50,6 +50,8 @@ def run_pipeline(
     )
     if len(filtered_df) == 0:
         raise ValueError("No queries remain after filtering")
+    # Reset index to ensure alignment with embeddings
+    filtered_df = filtered_df.reset_index(drop=True)
     # Step 2: Generate embeddings
     print("\nStep 2: Generating embeddings...")
     queries_list = filtered_df['query'].tolist()
@@ -65,6 +67,8 @@ def run_pipeline(
     # (Optional) File-based embedding storage could be refactored to Delta in future
     # Step 3: Cluster queries
     print("\nStep 3: Clustering queries...")
+    # Ensure alignment before clustering
+    assert len(embeddings) == len(filtered_df), f"Embeddings ({len(embeddings)}) and filtered_df ({len(filtered_df)}) are not aligned!"
     # NOTE: Clustering is still done in Pandas/Numpy; could be migrated to Spark for large scale
     clustered_df, cluster_metadata = cluster_queries(
         embeddings=embeddings,
