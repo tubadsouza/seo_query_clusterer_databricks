@@ -7,7 +7,6 @@ from typing import List, Dict, Optional
 import time
 import os
 from tqdm import tqdm
-from query_analyzer_databricks.pipeline import run_pipeline_from_notebook
 
 
 def generate_seo_queries(
