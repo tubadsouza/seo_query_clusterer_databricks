@@ -64,7 +64,7 @@ def load_and_filter_queries(
     })
     if 'topics' in result_df.columns:
         result_df['topics'] = result_df['topics'].apply(
-            lambda x: [t.strip() for t in str(x).split(',') if pd.notna(x) and x != '' else []]
+            lambda x: [t.strip() for t in str(x).split(',')] if pd.notna(x) and x != '' else []
         )
     final_count = len(result_df)
     print(f"Query filtering summary:")
