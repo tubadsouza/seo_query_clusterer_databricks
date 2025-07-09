@@ -15,23 +15,15 @@ def run_pipeline(
     input_table: str,
     output_table: str,
     limit: int = 50000,
-    # Data loading parameters
     min_length: int = 30,
     require_topics: bool = True,
     language_filter: bool = True,
-    # Embedding parameters
     batch_size: int = 100,
     embedding_model: str = "text-embedding-3-large",
     api_key: Optional[str] = None,
     rate_limit_delay: float = 1.0,
-    # Clustering parameters
-    min_cluster_size: int = 3,
-    max_cluster_size: int = 5,
-    min_cluster_similarity: float = 0.6,
-    min_seo_similarity: float = 0.8,
-    min_unique_users: int = 3,
-    # SEO generation parameters
-    queries_per_cluster: int = 1
+    queries_per_cluster: int = 1,
+    **kwargs
 ) -> Dict[str, Any]:
     """
     Run the complete query analysis pipeline (Databricks-optimized).
@@ -69,15 +61,15 @@ def run_pipeline(
     print("\nStep 3: Clustering queries...")
     # Ensure alignment before clustering
     assert len(embeddings) == len(filtered_df), f"Embeddings ({len(embeddings)}) and filtered_df ({len(filtered_df)}) are not aligned!"
-    # NOTE: Clustering is still done in Pandas/Numpy; could be migrated to Spark for large scale
+    # Extract clustering parameters from kwargs or use defaults
+    clustering_params = {k: v for k, v in kwargs.items() if k in [
+        'min_cluster_size', 'max_cluster_size', 'min_cluster_similarity',
+        'min_seo_similarity', 'min_unique_users', 'cluster_selection_epsilon'
+    ]}
     clustered_df, cluster_metadata = cluster_queries(
         embeddings=embeddings,
         queries_df=filtered_df,
-        min_cluster_size=min_cluster_size,
-        max_cluster_size=max_cluster_size,
-        min_cluster_similarity=min_cluster_similarity,
-        min_seo_similarity=min_seo_similarity,
-        min_unique_users=min_unique_users
+        **clustering_params
     )
     # Step 4: Generate SEO queries
     print("\nStep 4: Generating SEO queries...")
