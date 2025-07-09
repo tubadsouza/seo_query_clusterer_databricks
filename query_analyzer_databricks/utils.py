@@ -119,11 +119,15 @@ def detect_language(text: str) -> str:
         text: Text to analyze
     
     Returns:
-        Language code (e.g., 'en', 'es', etc.)
+        Language code (e.g., 'en', 'es', etc.) or 'unknown' if detection fails
     """
     try:
         from langdetect import detect
-        return detect(text)
+        from langdetect.lang_detect_exception import LangDetectException
+        try:
+            return detect(text)
+        except LangDetectException:
+            return 'unknown'
     except ImportError:
         # Fallback: assume English if langdetect not available
         return 'en'
