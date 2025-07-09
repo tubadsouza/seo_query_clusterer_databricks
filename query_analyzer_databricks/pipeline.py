@@ -82,8 +82,9 @@ def run_pipeline(
     # Write final SEO output to Databricks table (Delta)
     spark = SparkSession.builder.getOrCreate()
     spark_df = spark.createDataFrame(seo_df)
-    spark_df.write.mode("overwrite").saveAsTable(output_table)
-    print(f"Saved SEO queries to Databricks table: {output_table}")
+    if output_table:
+        spark_df.write.mode("overwrite").saveAsTable(output_table)
+        print(f"Saved SEO queries to Databricks table: {output_table}")
     # Compile results
     results = {
         'filtered_queries': filtered_df,

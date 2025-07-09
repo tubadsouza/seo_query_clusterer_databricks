@@ -115,7 +115,7 @@ def cluster_queries(
                 # Validate cluster
                 is_valid, metadata = validate_cluster(
                     cluster_items, cluster_embeddings, topic, label,
-                    min_cluster_similarity, min_seo_similarity, min_unique_users
+                    min_cluster_similarity, min_seo_similarity, min_unique_users, min_cluster_size
                 )
                 
                 if not is_valid:
@@ -201,7 +201,8 @@ def validate_cluster(
     label: int,
     min_cluster_similarity: float,
     min_seo_similarity: float,
-    min_unique_users: int
+    min_unique_users: int,
+    min_cluster_size: int
 ) -> Tuple[bool, Optional[Dict]]:
     """
     Validate a cluster and create metadata if valid.
@@ -214,14 +215,15 @@ def validate_cluster(
         min_cluster_similarity: Minimum similarity for valid clusters
         min_seo_similarity: Minimum similarity for SEO candidates
         min_unique_users: Minimum unique users per cluster
+        min_cluster_size: Minimum queries per cluster
     
     Returns:
         Tuple of (is_valid, metadata)
     """
     n_queries = len(cluster_items)
     reasons = []
-    if n_queries < 3:
-        reasons.append(f"too few queries: {n_queries} (min 3)")
+    if n_queries < min_cluster_size:
+        reasons.append(f"too few queries: {n_queries} (min {min_cluster_size})")
     # Compute average pairwise cosine similarity
     sim_matrix = cosine_similarity(cluster_embeddings)
     avg_sim = (np.sum(sim_matrix) - n_queries) / (n_queries * (n_queries - 1))
