@@ -116,26 +116,38 @@ def _generate_cluster_seo_queries(
     
     # Prepare the prompt
     prompt = f"""
-You are an SEO expert. Based on the following cluster of research queries, generate {queries_per_cluster} high-quality SEO search queries that would be typed into Google.
+You are an SEO and content expert working for an academic AI search engine. Based on the following cluster of research queries, generate {queries_per_cluster} high-quality SEO search queries that would realistically be typed into Google.
 
 Cluster Topic: {topic}
 Cluster Label: {cluster_label}
 
 Research Queries in this cluster:
-{chr(10).join([f"- {q}" for q in queries[:10]])}  # Limit to first 10 queries
+{chr(10).join([f”- {q}” for q in queries[:10]])}  # Limit to first 10 queries
 
-Generate {queries_per_cluster} SEO search queries that:
-1. Reflect common user search behavior (natural phrasing)
-2. Capture core user intent (informational, problem-solving, comparative)
-3. Represent the dominant theme in the cluster
-4. Are realistic & specific (avoid vague phrasing)
-5. Would be popular search terms for this topic
+Your goal is to create {queries_per_cluster} SEO search queries that:
+	1. Reflect natural search behavior and phrasing
+	2. Clearly express core user intent (e.g., informational, problem-solving, comparative)
+	3. Stay aligned with the dominant theme of the cluster
+	4. Are realistic, specific, and would be commonly searched
+	5. Are appropriate for indexing in Google and showing AI-generated literature summaries
+	6. Avoid extremely controversial, misleading, or high-risk medical or social topics (see below)
 
-Format your response as exactly {queries_per_cluster} lines - just the SEO queries. No numbering, no explanations, just the queries.
+Important: Avoid queries that, if surfaced with poor results, could lead to serious harm or backlash. Do not include queries involving:
+	• Highly politicized or medically controversial topics (e.g., ivermectin and COVID, vaccines and autism, GMOs and safety)
+	• Illicit drugs or addictive pharmaceuticals (e.g., Xanax, kratom, molly, Ambien)
+	• Morality or identity-based queries that could stir controversy (e.g., homosexuality, single motherhood as “cause”)
+Only flag and remove queries that could cause a major public stir if answered incorrectly. It’s okay to include nuanced or lightly controversial questions if they are broadly accepted in academic discussion.
 
-Example format:
-What are the symptoms of diabetes?
-How to manage diabetes naturally?
+Output Format:
+Return exactly {queries_per_cluster} SEO search queries.
+	• No numbering
+	• No explanations
+	• No extra text or formatting
+	• Just one query per line
+
+Example:
+How to treat early-stage diabetes?
+Do air purifiers help with asthma?
 """
 
     try:
