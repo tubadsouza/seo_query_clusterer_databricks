@@ -158,11 +158,11 @@ def get_pipeline_config() -> Dict[str, Any]:
             'rate_limit_delay': 1.0
         },
         'clustering': {
-            'min_cluster_size': 3,
+            'min_cluster_size': 2,
             'max_cluster_size': 5,
-            'min_cluster_similarity': 0.6,
-            'min_seo_similarity': 0.8,
-            'min_unique_users': 3
+            'min_cluster_similarity': 0.1,
+            'min_seo_similarity': 0.3,
+            'min_unique_users': 1
         },
         'seo_generation': {
             'queries_per_cluster': 1
