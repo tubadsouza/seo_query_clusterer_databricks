@@ -44,6 +44,10 @@ def load_and_filter_queries(
         length_mask = filtered_df['query'].str.len() >= min_length
         filters_applied['length'] = original_count - length_mask.sum()
         filtered_df = filtered_df[length_mask]
+    # Remove queries that are only whitespace
+    filtered_df = filtered_df[filtered_df['query'].str.strip() != '']
+    # Remove queries with no alphanumeric characters
+    filtered_df = filtered_df[filtered_df['query'].str.contains(r'[A-Za-z0-9]', na=False)]
     if language_filter:
         lang_mask = filtered_df['query'].apply(is_english)
         filters_applied['language'] = len(filtered_df) - lang_mask.sum()
