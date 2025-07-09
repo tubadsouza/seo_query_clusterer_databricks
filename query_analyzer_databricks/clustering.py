@@ -65,6 +65,7 @@ def cluster_queries(
     
     for topic, group in tqdm(topic_groups.items(), desc="Clustering by topic"):
         if len(group) < min_cluster_size:
+            print(f"[DEBUG] Topic '{topic}' skipped: only {len(group)} queries (min required: {min_cluster_size})")
             # Assign small groups to noise
             for item in group:
                 query_key = (item['query'], tuple(item['topics']))
@@ -116,6 +117,9 @@ def cluster_queries(
                     cluster_items, cluster_embeddings, topic, label,
                     min_cluster_similarity, min_seo_similarity, min_unique_users
                 )
+                
+                if not is_valid:
+                    print(f"[DEBUG] Cluster {topic}_{label} rejected. Reason(s):", metadata)
                 
                 if is_valid:
                     # Add cluster metadata
@@ -215,32 +219,25 @@ def validate_cluster(
         Tuple of (is_valid, metadata)
     """
     n_queries = len(cluster_items)
-    
+    reasons = []
     if n_queries < 3:
-        return False, None
-    
+        reasons.append(f"too few queries: {n_queries} (min 3)")
     # Compute average pairwise cosine similarity
     sim_matrix = cosine_similarity(cluster_embeddings)
     avg_sim = (np.sum(sim_matrix) - n_queries) / (n_queries * (n_queries - 1))
-    
-    # Check similarity threshold
     if avg_sim < min_cluster_similarity:
-        return False, None
-    
+        reasons.append(f"low avg similarity: {avg_sim:.4f} (min {min_cluster_similarity})")
     # Check user diversity
     unique_users = set(item['user'] for item in cluster_items)
     if len(unique_users) < min_unique_users:
-        return False, None
-    
+        reasons.append(f"not enough unique users: {len(unique_users)} (min {min_unique_users})")
     # Find most central query
     centroid = np.mean(cluster_embeddings, axis=0)
     distances = np.linalg.norm(cluster_embeddings - centroid, axis=1)
     central_idx = int(np.argmin(distances))
-    
     # Create metadata
     cluster_label = f"{topic}_{label}"
     seo_candidate = avg_sim >= min_seo_similarity
-    
     metadata = {
         'topic': topic,
         'cluster_label': cluster_label,
@@ -248,9 +245,11 @@ def validate_cluster(
         'avg_similarity': round(float(avg_sim), 4),
         'unique_users': len(unique_users),
         'most_central_query': cluster_items[central_idx]['query'],
-        'seo_candidate': str(seo_candidate).lower()
+        'seo_candidate': str(seo_candidate).lower(),
+        'rejection_reasons': reasons if reasons else None
     }
-    
+    if reasons:
+        return False, metadata
     return True, metadata
 
 
